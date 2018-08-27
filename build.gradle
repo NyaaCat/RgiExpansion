@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+
+    jcenter()
+
+    maven {
+        name 'Spigot'
+        url 'https://hub.spigotmc.org/nexus/content/groups/public/'
+    }
+
+    maven {
+        name 'NyaaCentral'
+        url 'https://raw.githubusercontent.com/NyaaCat/NyaaCentral/maven-repo'
+    }
+
+    maven {
+        url "http://repo.dmulloy2.net/nexus/repository/public/"
+    }
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+dependencies {
+    compile 'org.spigotmc:spigot-api:1.13.1-R0.1-SNAPSHOT'
+    compile('cat.nyaa:nyaacore:6.2-SNAPSHOT') {
+        transitive = false
+    }
+    compile('cat.nyaa:rpgitems:3.6-SNAPSHOT') {
+        transitive = false
+    }
+    compile 'org.librazy:NyaaUtilsLangChecker:2.0-SNAPSHOT'
+    //compileOnly 'com.comphenix.protocol:ProtocolLib-API:4.4.0'
+    compileOnly files("lib/ProtocolLib-API-4.4.0-20180824.144628-37.jar")
+    compileOnly 'com.comphenix.packetwrapper:PacketWrapper:1.13-R0.1-SNAPSHOT'
+}
+
+String nyaaCoreLangDir = System.getenv("NYAACORE_LANG_DIR")
+
+compileJava {
+    options.compilerArgs += ["-Xplugin:NyaaUtilsLangAnnotationProcessor", "-Xlint:deprecation,unchecked,rawtypes"]
+    if (nyaaCoreLangDir != null) {
+        options.compilerArgs += ["-ALANG_DIR_ADDITIONAL_PATH=" + nyaaCoreLangDir]
+    }
+}

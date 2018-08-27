@@ -1,0 +1,5 @@
+internal:
+  info:
+    using_language: '当前使用语言: %s'
+    command_complete: 命令已执行!
+    usage_prompt: '用法: %s'

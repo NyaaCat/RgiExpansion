@@ -1,0 +1,7 @@
+name: RgiExpansion
+version: 3.6
+main: cat.nyaa.rpgitems.ext.RgiExpansion
+depend: [NyaaCore,RPGItems,ProtocolLib]
+authors: [Librazy]
+api-version: 1.13
+

@@ -1,0 +1,7 @@
+internal:
+  info:
+    using_language: 'Now using language: %s'
+    command_complete: Command Executed!
+    usage_prompt: 'Usage: %s'
+power:
+  cast: 投掷物品
