@@ -6,10 +6,10 @@ import org.librazy.nclangchecker.LangKey;
 
 public class I18n extends LanguageRepository {
     public static I18n instance = null;
-    private final RgiExpansion plugin;
+    private final RPGItemsExtNyaacat plugin;
     private String lang = null;
 
-    public I18n(RgiExpansion plugin, String lang) {
+    public I18n(RPGItemsExtNyaacat plugin, String lang) {
         instance = this;
         this.plugin = plugin;
         this.lang = lang;

@@ -24,13 +24,13 @@ import java.util.function.Consumer;
 
 import static com.comphenix.protocol.PacketType.Play.Server.*;
 
-public final class RgiExpansion extends JavaPlugin {
+public final class RPGItemsExtNyaacat extends JavaPlugin {
 
     public static boolean hijackEntitySpawn;
 
     public static ProtocolManager protocolManager;
 
-    public static RgiExpansion plugin;
+    public static RPGItemsExtNyaacat plugin;
 
     public static Set<Integer> hiddenEntities = new HashSet<>();
 
@@ -73,7 +73,7 @@ public final class RgiExpansion extends JavaPlugin {
         });
 
         protocolManager.addPacketListener(
-                new PacketAdapter(RgiExpansion.plugin, ListenerPriority.NORMAL, ENTITY_PACKETS) {
+                new PacketAdapter(RPGItemsExtNyaacat.plugin, ListenerPriority.NORMAL, ENTITY_PACKETS) {
                     @Override
                     public void onPacketSending(PacketEvent event) {
                         int entityID = event.getPacket().getIntegers().read(0);

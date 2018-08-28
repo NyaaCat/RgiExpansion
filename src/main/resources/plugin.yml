@@ -1,6 +1,6 @@
-name: RgiExpansion
+name: rpgitems-ext-nyaacat
 version: 3.6
-main: cat.nyaa.rpgitems.ext.RgiExpansion
+main: cat.nyaa.rpgitems.ext.RPGItemsExtNyaacat
 depend: [NyaaCore,RPGItems,ProtocolLib]
 authors: [Librazy]
 api-version: 1.13

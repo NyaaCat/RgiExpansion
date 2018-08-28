@@ -4,9 +4,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 
-import static cat.nyaa.rpgitems.ext.RgiExpansion.entityMetadataHandler;
-import static cat.nyaa.rpgitems.ext.RgiExpansion.entitySpawnHandler;
-import static cat.nyaa.rpgitems.ext.RgiExpansion.hiddenEntities;
+import static cat.nyaa.rpgitems.ext.RPGItemsExtNyaacat.entityMetadataHandler;
+import static cat.nyaa.rpgitems.ext.RPGItemsExtNyaacat.entitySpawnHandler;
+import static cat.nyaa.rpgitems.ext.RPGItemsExtNyaacat.hiddenEntities;
 
 public class EventListener implements Listener {
 

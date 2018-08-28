@@ -2,7 +2,7 @@ package cat.nyaa.rpgitems.ext.power;
 
 import cat.nyaa.nyaacore.utils.TridentUtils;
 import cat.nyaa.rpgitems.ext.I18n;
-import cat.nyaa.rpgitems.ext.RgiExpansion;
+import cat.nyaa.rpgitems.ext.RPGItemsExtNyaacat;
 import com.comphenix.packetwrapper.WrapperPlayServerEntityMetadata;
 import com.comphenix.packetwrapper.WrapperPlayServerSpawnEntity;
 import com.comphenix.protocol.events.PacketContainer;
@@ -19,20 +19,56 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import think.rpgitems.Events;
-import think.rpgitems.power.PowerMeta;
-import think.rpgitems.power.PowerProjectileHit;
-import think.rpgitems.power.PowerResult;
-import think.rpgitems.power.PowerRightClick;
+import think.rpgitems.power.*;
 
 import java.util.*;
 
-import static cat.nyaa.rpgitems.ext.RgiExpansion.*;
+import static cat.nyaa.rpgitems.ext.RPGItemsExtNyaacat.*;
 import static com.comphenix.packetwrapper.WrapperPlayServerSpawnEntity.ObjectTypes.ITEM_STACK;
+import static think.rpgitems.Events.tridentCache;
+import static think.rpgitems.power.Utils.checkCooldown;
 
-@PowerMeta(immutableTrigger = true)
-public class PowerThrowable  extends BasePower implements PowerRightClick, PowerProjectileHit {
+@PowerMeta(defaultTrigger = {TriggerType.RIGHT_CLICK})
+public class PowerThrowable extends BasePower implements PowerRightClick, PowerLeftClick, PowerProjectileHit {
+
+    /**
+     * Cooldown time of this power
+     */
+    @Property
+    public long cooldown = 20;
+
+    /**
+     * Cost of this power
+     */
+    @Property
+    public int cost = 0;
+
+    /**
+     * When to return back to the player who threw it after it comes in contact with any block or entity, in tick. 0 to disable.
+     */
+    @Property
+    public int autoReturn = 0;
+
+    /**
+     * Reduce autoReturn with level * 20
+     */
+    @Property
+    public boolean loyaltyEnchant = false;
+
     @Override
-    public PowerResult<Void> rightClick(Player player, ItemStack itemStack, Block block, PlayerInteractEvent playerInteractEvent) {
+    public PowerResult<Void> rightClick(Player player, ItemStack stack, Block block, PlayerInteractEvent playerInteractEvent) {
+        return fire(player, stack);
+    }
+
+    @Override
+    public PowerResult<Void> leftClick(Player player, ItemStack stack, Block block, PlayerInteractEvent playerInteractEvent) {
+        return fire(player, stack);
+    }
+
+    private PowerResult<Void> fire(Player player, ItemStack stack) {
+        if (!checkCooldown(this, player, cooldown, true)) return PowerResult.cd();
+        ItemStack orig = stack.clone();
+        if (!getItem().consumeDurability(stack, cost)) return PowerResult.cost();
         hijackEntitySpawn = true;
         Trident entity = player.launchProjectile(Trident.class);
         hijackEntitySpawn = false;
@@ -42,13 +78,13 @@ public class PowerThrowable  extends BasePower implements PowerRightClick, Power
         entitySpawnCache.invalidate(entityId);
 
         entitySpawnHandler.put(entityId, packetEvent -> packetEvent.setPacket(getFakeItemStack(entityId, packetEvent.getPacket()).getHandle()));
-        entityMetadataHandler.put(entityId, packetEvent -> packetEvent.setPacket(getFakeMetadata(entityId, itemStack).getHandle()));
+        entityMetadataHandler.put(entityId, packetEvent -> packetEvent.setPacket(getFakeMetadata(entityId, orig).getHandle()));
 
         entity.setSilent(true);
         entity.setPersistent(false);
 
         WrapperPlayServerSpawnEntity spawnEntity = getFakeItemStack(entityId, packetContainer);
-        WrapperPlayServerEntityMetadata metadata = getFakeMetadata(entityId, itemStack);
+        WrapperPlayServerEntityMetadata metadata = getFakeMetadata(entityId, orig);
 
         protocolManager.broadcastServerPacket(spawnEntity.getHandle());
         protocolManager.broadcastServerPacket(metadata.getHandle());
@@ -56,9 +92,8 @@ public class PowerThrowable  extends BasePower implements PowerRightClick, Power
         Events.rpgProjectiles.put(entityId, getItem().getUID());
 
         UUID uuid = entity.getUniqueId();
-        Events.tridentCache.put(uuid, itemStack.clone());
+        Events.tridentCache.put(uuid, stack.clone());
         ItemStack fakeItem = new ItemStack(Material.TRIDENT);
-        fakeItem.addEnchantment(Enchantment.LOYALTY, 3);
         List<String> fakeLore = new ArrayList<>(1);
         fakeLore.add(uuid.toString());
         ItemMeta fakeItemItemMeta = fakeItem.getItemMeta();
@@ -66,12 +101,12 @@ public class PowerThrowable  extends BasePower implements PowerRightClick, Power
         fakeItem.setItemMeta(fakeItemItemMeta);
         TridentUtils.setTridentItemStack(entity, fakeItem);
 
-        ItemStack stack = player.getInventory().getItemInMainHand();
-        int count = stack.getAmount() - 1;
+        ItemStack itemInMainHand = player.getInventory().getItemInMainHand();
+        int count = itemInMainHand.getAmount() - 1;
         if (count == 0) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(RgiExpansion.plugin, () -> player.getInventory().setItemInMainHand(new ItemStack(Material.AIR)), 1L);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(RPGItemsExtNyaacat.plugin, () -> player.getInventory().setItemInMainHand(new ItemStack(Material.AIR)), 1L);
         } else {
-            stack.setAmount(count);
+            itemInMainHand.setAmount(count);
         }
         return PowerResult.ok();
     }
@@ -116,6 +151,34 @@ public class PowerThrowable  extends BasePower implements PowerRightClick, Power
 
     @Override
     public PowerResult<Void> projectileHit(Player player, ItemStack stack, Projectile arrow, ProjectileHitEvent event) {
-        return PowerResult.ok();
+        if (autoReturn > 0) {
+            if (item.getDurability(stack) <= 0) return PowerResult.fail();
+            int returnTime = this.autoReturn;
+            if (loyaltyEnchant) {
+                returnTime = returnTime - 20 * stack.getEnchantmentLevel(Enchantment.LOYALTY);
+                returnTime = Math.max(0, returnTime);
+            }
+            Bukkit.getScheduler().runTaskLater(RPGItemsExtNyaacat.plugin, () -> {
+                if (!arrow.isDead() && arrow.isValid()) {
+                    arrow.remove();
+                    UUID uniqueId = arrow.getUniqueId();
+                    ItemStack orig = tridentCache.remove(uniqueId);
+                    HashMap<Integer, ItemStack> drop = player.getInventory().addItem(orig);
+                    if (!drop.isEmpty()) {
+                        drop.values().forEach(i -> player.getLocation().getWorld().dropItem(player.getLocation(), i)
+                        );
+                    }
+                }
+            }, returnTime);
+            return PowerResult.ok();
+        }
+        return PowerResult.noop();
+    }
+
+    @Override
+    public Set<TriggerType> getTriggers() {
+        Set<TriggerType> triggers = super.getTriggers();
+        triggers.add(TriggerType.PROJECTILE_HIT);
+        return triggers;
     }
 }

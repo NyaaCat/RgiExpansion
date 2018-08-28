@@ -1,6 +1,6 @@
 package cat.nyaa.rpgitems.ext.power;
 
-import cat.nyaa.rpgitems.ext.RgiExpansion;
+import cat.nyaa.rpgitems.ext.RPGItemsExtNyaacat;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -106,6 +106,6 @@ abstract class BasePower implements Serializable, Power {
 
     @Override
     public NamespacedKey getNamespacedKey() {
-        return new NamespacedKey(RgiExpansion.plugin, getName());
+        return new NamespacedKey(RPGItemsExtNyaacat.plugin, getName());
     }
 }
