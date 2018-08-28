@@ -5,6 +5,10 @@ plugins {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+ext.majorVersion = 3
+ext.minorVersion = 6
+ext.minecraftVersion = "1.13.1"
+
 repositories {
     mavenLocal()
 

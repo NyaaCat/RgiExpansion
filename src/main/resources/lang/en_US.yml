@@ -4,4 +4,4 @@ internal:
     command_complete: Command Executed!
     usage_prompt: 'Usage: %s'
 power:
-  cast: 投掷物品
+  throwable: Throw this item
