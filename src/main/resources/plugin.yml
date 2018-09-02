@@ -1,7 +1,7 @@
 name: rpgitems-ext-nyaacat
 version: 3.6
 main: cat.nyaa.rpgitems.ext.RPGItemsExtNyaacat
-depend: [NyaaCore,RPGItems,ProtocolLib]
+depend: [NyaaCore,RPGItems,ProtocolLib,PacketWrapper]
 authors: [Librazy]
 api-version: 1.13
 

@@ -20,7 +20,7 @@ abstract class BasePower implements Serializable, Power {
 
     @Property
     @AcceptedValue(preset = Preset.TRIGGERS)
-    public Set<TriggerType> triggers = Power.getTriggerTypes(this.getClass());
+    public Set<TriggerType> triggers = Power.getDefaultTriggerTypes(this.getClass());
 
     @Property
     public Set<String> selectors = new HashSet<>();
@@ -52,14 +52,17 @@ abstract class BasePower implements Serializable, Power {
             }
             try {
                 Serializer getter = field.getAnnotation(Serializer.class);
+                Object val = field.get(this);
+                if (val == null) continue;
                 if (getter != null) {
-                    section.set(property.name(), Getter.from(getter.value()).get(field.get(this)));
+                    section.set(property.name(), Getter.from(getter.value()).get(val));
                 } else {
                     if (Collection.class.isAssignableFrom(field.getType())) {
-                        Collection c = (Collection) field.get(this);
+                        Collection c = (Collection) val;
+                        if (c.isEmpty()) continue;
                         section.set(property.name(), c.stream().map(Object::toString).collect(Collectors.joining(",")));
                     } else {
-                        section.set(property.name(), field.get(this));
+                        section.set(property.name(), val);
                     }
                 }
             } catch (IllegalAccessException e) {
@@ -79,6 +82,9 @@ abstract class BasePower implements Serializable, Power {
                 continue;
             }
             String value = section.getString(property.name());
+            if (property.name().equals("cost") && value == null) {
+                value = section.getString("consumption");
+            }
             if (value != null) {
                 try {
                     PowerManager.setPowerProperty(Bukkit.getConsoleSender(), this, field, value);
@@ -103,7 +109,7 @@ abstract class BasePower implements Serializable, Power {
     public Set<String> getSelectors() {
         return selectors;
     }
-
+    
     @Override
     public NamespacedKey getNamespacedKey() {
         return new NamespacedKey(RPGItemsExtNyaacat.plugin, getName());

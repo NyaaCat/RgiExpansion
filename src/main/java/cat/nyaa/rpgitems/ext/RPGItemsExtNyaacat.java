@@ -54,7 +54,6 @@ public final class RPGItemsExtNyaacat extends JavaPlugin {
     public void onLoad() {
         plugin = this;
         super.onLoad();
-        protocolManager = ProtocolLibrary.getProtocolManager();
         PowerManager.registerPowers(this, "cat.nyaa.rpgitems.ext.power");
         PowerManager.addDescriptionResolver(this, (power, property) -> {
             if (property == null) {
@@ -71,29 +70,6 @@ public final class RPGItemsExtNyaacat extends JavaPlugin {
             }
             return null;
         });
-
-        protocolManager.addPacketListener(
-                new PacketAdapter(RPGItemsExtNyaacat.plugin, ListenerPriority.NORMAL, ENTITY_PACKETS) {
-                    @Override
-                    public void onPacketSending(PacketEvent event) {
-                        int entityID = event.getPacket().getIntegers().read(0);
-                        if (hijackEntitySpawn && event.getPacketType() == SPAWN_ENTITY && entitySpawnCache.getIfPresent(entityID) == null) {
-                            WrapperPlayServerSpawnEntity spawnEntity = new WrapperPlayServerSpawnEntity(event.getPacket());
-                            entitySpawnCache.put(entityID, spawnEntity.getHandle().deepClone());
-                            event.setCancelled(true);
-                            return;
-                        }
-                        if (hiddenEntities.contains(entityID) || entitySpawnCache.getIfPresent(entityID) != null) {
-                            event.setCancelled(true);
-                        }
-                        if (entitySpawnHandler.containsKey(entityID) && event.getPacketType() == SPAWN_ENTITY) {
-                            entitySpawnHandler.get(entityID).accept(event);
-                        }
-                        if (entityMetadataHandler.containsKey(entityID) && event.getPacketType() == ENTITY_METADATA) {
-                            entityMetadataHandler.get(entityID).accept(event);
-                        }
-                    }
-                });
     }
 
     @Override
@@ -101,11 +77,36 @@ public final class RPGItemsExtNyaacat extends JavaPlugin {
         plugin = this;
         new I18n(this, "en_US");
         getServer().getPluginManager().registerEvents(new EventListener(), this);
+        protocolManager = ProtocolLibrary.getProtocolManager();
+        PacketAdapter packetAdapter = new PacketAdapter(RPGItemsExtNyaacat.plugin, ListenerPriority.NORMAL, ENTITY_PACKETS) {
+            @Override
+            public void onPacketSending(PacketEvent event) {
+                int entityID = event.getPacket().getIntegers().read(0);
+                if (hijackEntitySpawn && event.getPacketType() == SPAWN_ENTITY && entitySpawnCache.getIfPresent(entityID) == null) {
+                    WrapperPlayServerSpawnEntity spawnEntity = new WrapperPlayServerSpawnEntity(event.getPacket());
+                    entitySpawnCache.put(entityID, spawnEntity.getHandle().deepClone());
+                    event.setCancelled(true);
+                    return;
+                }
+                if (hiddenEntities.contains(entityID) || entitySpawnCache.getIfPresent(entityID) != null) {
+                    event.setCancelled(true);
+                }
+                if (entitySpawnHandler.containsKey(entityID) && event.getPacketType() == SPAWN_ENTITY) {
+                    entitySpawnHandler.get(entityID).accept(event);
+                }
+                if (entityMetadataHandler.containsKey(entityID) && event.getPacketType() == ENTITY_METADATA) {
+                    entityMetadataHandler.get(entityID).accept(event);
+                }
+            }
+        };
+
+        protocolManager.addPacketListener(packetAdapter);
     }
 
     @Override
     public void onDisable() {
         this.getServer().getScheduler().cancelTasks(plugin);
+        protocolManager.removePacketListeners(plugin);
         plugin = null;
     }
 }
