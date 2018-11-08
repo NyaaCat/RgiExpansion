@@ -1,26 +1,27 @@
 package cat.nyaa.rpgitems.ext.power;
 
+import cat.nyaa.rpgitems.ext.I18n;
 import cat.nyaa.rpgitems.ext.RPGItemsExtNyaacat;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.inventory.ItemStack;
 import think.rpgitems.item.RPGItem;
 import think.rpgitems.power.*;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Base class containing common methods and fields.
  */
-abstract class BasePower implements Serializable, Power {
+public abstract class BasePower implements Serializable, Power {
     RPGItem item;
 
     @Property
     @AcceptedValue(preset = Preset.TRIGGERS)
-    public Set<TriggerType> triggers = Power.getDefaultTriggerTypes(this.getClass());
+    public Set<Trigger> triggers = Power.getDefaultTriggerTypes(this.getClass());
 
     @Property
     public Set<String> selectors = new HashSet<>();
@@ -38,7 +39,6 @@ abstract class BasePower implements Serializable, Power {
         this.item = item;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void save(ConfigurationSection section) {
         SortedMap<PowerProperty, Field> properties = PowerManager.getProperties(this.getClass());
@@ -51,20 +51,7 @@ abstract class BasePower implements Serializable, Power {
                 continue;
             }
             try {
-                Serializer getter = field.getAnnotation(Serializer.class);
-                Object val = field.get(this);
-                if (val == null) continue;
-                if (getter != null) {
-                    section.set(property.name(), Getter.from(getter.value()).get(val));
-                } else {
-                    if (Collection.class.isAssignableFrom(field.getType())) {
-                        Collection c = (Collection) val;
-                        if (c.isEmpty()) continue;
-                        section.set(property.name(), c.stream().map(Object::toString).collect(Collectors.joining(",")));
-                    } else {
-                        section.set(property.name(), val);
-                    }
-                }
+                Utils.saveProperty(this, section, property.name(), field);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
@@ -81,6 +68,17 @@ abstract class BasePower implements Serializable, Power {
             if (property.name().equals("triggers") && powerMeta.immutableTrigger()) {
                 continue;
             }
+            if (field.getType().isAssignableFrom(ItemStack.class)) {
+                ItemStack itemStack = section.getItemStack(property.name());
+                if (itemStack != null) {
+                    try {
+                        field.set(this, itemStack);
+                        continue;
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
             String value = section.getString(property.name());
             if (property.name().equals("cost") && value == null) {
                 value = section.getString("consumption");
@@ -96,22 +94,27 @@ abstract class BasePower implements Serializable, Power {
     }
 
     @Override
-    public Set<TriggerType> getTriggers() {
-        return triggers;
+    public Set<Trigger> getTriggers() {
+        return Collections.unmodifiableSet(triggers);
     }
 
     @Override
     public Set<String> getConditions() {
-        return conditions;
+        return Collections.unmodifiableSet(conditions);
     }
 
     @Override
     public Set<String> getSelectors() {
-        return selectors;
+        return Collections.unmodifiableSet(selectors);
     }
-    
+
     @Override
     public NamespacedKey getNamespacedKey() {
         return new NamespacedKey(RPGItemsExtNyaacat.plugin, getName());
+    }
+
+    @Override
+    public String getLocalizedName(String locale) {
+        return I18n.format("power.properties." + getName() + ".main_name");
     }
 }

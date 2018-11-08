@@ -28,7 +28,7 @@ import static com.comphenix.packetwrapper.WrapperPlayServerSpawnEntity.ObjectTyp
 import static think.rpgitems.Events.tridentCache;
 import static think.rpgitems.power.Utils.checkCooldown;
 
-@PowerMeta(defaultTrigger = {TriggerType.RIGHT_CLICK})
+@PowerMeta(defaultTrigger = "RIGHT_CLICK")
 public class PowerThrowable extends BasePower implements PowerRightClick, PowerLeftClick, PowerProjectileHit {
 
     /**
@@ -56,12 +56,12 @@ public class PowerThrowable extends BasePower implements PowerRightClick, PowerL
     public boolean loyaltyEnchant = false;
 
     @Override
-    public PowerResult<Void> rightClick(Player player, ItemStack stack, Block block, PlayerInteractEvent playerInteractEvent) {
+    public PowerResult<Void> rightClick(Player player, ItemStack stack, PlayerInteractEvent playerInteractEvent) {
         return fire(player, stack);
     }
 
     @Override
-    public PowerResult<Void> leftClick(Player player, ItemStack stack, Block block, PlayerInteractEvent playerInteractEvent) {
+    public PowerResult<Void> leftClick(Player player, ItemStack stack, PlayerInteractEvent playerInteractEvent) {
         return fire(player, stack);
     }
 
@@ -150,7 +150,8 @@ public class PowerThrowable extends BasePower implements PowerRightClick, PowerL
     }
 
     @Override
-    public PowerResult<Void> projectileHit(Player player, ItemStack stack, Projectile arrow, ProjectileHitEvent event) {
+    public PowerResult<Void> projectileHit(Player player, ItemStack stack, ProjectileHitEvent event) {
+        Projectile arrow = event.getEntity();
         if (autoReturn > 0) {
             if (item.getDurability(stack) <= 0) return PowerResult.fail();
             int returnTime = this.autoReturn;
@@ -176,9 +177,9 @@ public class PowerThrowable extends BasePower implements PowerRightClick, PowerL
     }
 
     @Override
-    public Set<TriggerType> getTriggers() {
-        Set<TriggerType> triggers = super.getTriggers();
-        triggers.add(TriggerType.PROJECTILE_HIT);
+    public Set<Trigger> getTriggers() {
+        Set<Trigger> triggers = super.getTriggers();
+        triggers.add(Trigger.PROJECTILE_HIT);
         return triggers;
     }
 }

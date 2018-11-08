@@ -34,16 +34,15 @@ configurations.all {
 }
 
 dependencies {
-    compile 'org.spigotmc:spigot-api:1.13.1-R0.1-SNAPSHOT'
-    compile('cat.nyaa:nyaacore:6.2-SNAPSHOT') {
+    compile 'org.spigotmc:spigot-api:1.13.2-R0.1-SNAPSHOT'
+    compile('cat.nyaa:nyaacore:6.3-SNAPSHOT') {
         transitive = false
     }
     compile('cat.nyaa:rpgitems:3.6-SNAPSHOT') {
         transitive = false
     }
     compile 'org.librazy:NyaaUtilsLangChecker:2.0-SNAPSHOT'
-    //compileOnly 'com.comphenix.protocol:ProtocolLib-API:4.4.0'
-    compileOnly files("lib/ProtocolLib-API-4.4.0-20180824.144628-37.jar")
+    compileOnly 'com.comphenix.protocol:ProtocolLib-API:4.4.0'
     compileOnly 'com.comphenix.packetwrapper:PacketWrapper:1.13-R0.1-SNAPSHOT'
 }
 
