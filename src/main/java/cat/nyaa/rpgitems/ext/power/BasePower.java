@@ -21,7 +21,8 @@ public abstract class BasePower implements Serializable, Power {
 
     @Property
     @AcceptedValue(preset = Preset.TRIGGERS)
-    public Set<Trigger> triggers = Power.getDefaultTriggerTypes(this.getClass());
+    @SuppressWarnings("rawtypes")
+    public Set<Trigger> triggers = Power.getDefaultTriggers(this.getClass());
 
     @Property
     public Set<String> selectors = new HashSet<>();
@@ -85,7 +86,7 @@ public abstract class BasePower implements Serializable, Power {
             }
             if (value != null) {
                 try {
-                    PowerManager.setPowerProperty(Bukkit.getConsoleSender(), this, field, value);
+                    Utils.setPowerProperty(Bukkit.getConsoleSender(), this, field, value);
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
@@ -94,6 +95,7 @@ public abstract class BasePower implements Serializable, Power {
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public Set<Trigger> getTriggers() {
         return Collections.unmodifiableSet(triggers);
     }

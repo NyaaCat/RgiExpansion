@@ -28,8 +28,8 @@ import static com.comphenix.packetwrapper.WrapperPlayServerSpawnEntity.ObjectTyp
 import static think.rpgitems.Events.tridentCache;
 import static think.rpgitems.power.Utils.checkCooldown;
 
-@PowerMeta(defaultTrigger = "RIGHT_CLICK")
-public class PowerThrowable extends BasePower implements PowerRightClick, PowerLeftClick, PowerProjectileHit {
+@PowerMeta(defaultTrigger = "RIGHT_CLICK", generalInterface = PowerPlain.class)
+public class PowerThrowable extends BasePower implements PowerRightClick, PowerLeftClick, PowerProjectileHit, PowerPlain {
 
     /**
      * Cooldown time of this power
@@ -65,7 +65,9 @@ public class PowerThrowable extends BasePower implements PowerRightClick, PowerL
         return fire(player, stack);
     }
 
-    private PowerResult<Void> fire(Player player, ItemStack stack) {
+    @Override
+    @SuppressWarnings("deprecation")
+    public PowerResult<Void> fire(Player player, ItemStack stack) {
         if (!checkCooldown(this, player, cooldown, true)) return PowerResult.cd();
         ItemStack orig = stack.clone();
         if (!getItem().consumeDurability(stack, cost)) return PowerResult.cost();
@@ -177,6 +179,7 @@ public class PowerThrowable extends BasePower implements PowerRightClick, PowerL
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public Set<Trigger> getTriggers() {
         Set<Trigger> triggers = super.getTriggers();
         triggers.add(Trigger.PROJECTILE_HIT);
