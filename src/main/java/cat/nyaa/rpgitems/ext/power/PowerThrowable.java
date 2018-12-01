@@ -9,7 +9,6 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -25,7 +24,6 @@ import java.util.*;
 
 import static cat.nyaa.rpgitems.ext.RPGItemsExtNyaacat.*;
 import static com.comphenix.packetwrapper.WrapperPlayServerSpawnEntity.ObjectTypes.ITEM_STACK;
-import static think.rpgitems.Events.tridentCache;
 import static think.rpgitems.power.Utils.checkCooldown;
 
 @PowerMeta(defaultTrigger = "RIGHT_CLICK", generalInterface = PowerPlain.class)
@@ -91,10 +89,10 @@ public class PowerThrowable extends BasePower implements PowerRightClick, PowerL
         protocolManager.broadcastServerPacket(spawnEntity.getHandle());
         protocolManager.broadcastServerPacket(metadata.getHandle());
 
-        Events.rpgProjectiles.put(entityId, getItem().getUID());
+        Events.registerProjectile(entityId, getItem().getUID());
 
         UUID uuid = entity.getUniqueId();
-        Events.tridentCache.put(uuid, stack.clone());
+        Events.registerLocalItemStack(uuid, stack.clone());
         ItemStack fakeItem = new ItemStack(Material.TRIDENT);
         List<String> fakeLore = new ArrayList<>(1);
         fakeLore.add(uuid.toString());
@@ -165,7 +163,7 @@ public class PowerThrowable extends BasePower implements PowerRightClick, PowerL
                 if (!arrow.isDead() && arrow.isValid()) {
                     arrow.remove();
                     UUID uniqueId = arrow.getUniqueId();
-                    ItemStack orig = tridentCache.remove(uniqueId);
+                    ItemStack orig = Events.removeLocalItemStack(uniqueId);
                     HashMap<Integer, ItemStack> drop = player.getInventory().addItem(orig);
                     if (!drop.isEmpty()) {
                         drop.values().forEach(i -> player.getLocation().getWorld().dropItem(player.getLocation(), i)
