@@ -20,6 +20,9 @@ public abstract class BasePower implements Serializable, Power {
     RPGItem item;
 
     @Property
+    public String displayName = getLocalizedName(I18n.instance.getLanguage());
+
+    @Property
     @AcceptedValue(preset = Preset.TRIGGERS)
     @SuppressWarnings("rawtypes")
     public Set<Trigger> triggers = Power.getDefaultTriggers(this.getClass());
@@ -85,13 +88,14 @@ public abstract class BasePower implements Serializable, Power {
                 value = section.getString("consumption");
             }
             if (value != null) {
-                try {
-                    Utils.setPowerProperty(Bukkit.getConsoleSender(), this, field, value);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
+                Utils.setPowerPropertyUnchecked(Bukkit.getConsoleSender(), this, field, value);
             }
         }
+    }
+
+    @Override
+    public String displayName() {
+        return displayName;
     }
 
     @Override

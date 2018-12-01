@@ -7,7 +7,7 @@ import org.librazy.nclangchecker.LangKey;
 public class I18n extends LanguageRepository {
     public static I18n instance = null;
     private final RPGItemsExtNyaacat plugin;
-    private String lang = null;
+    private String lang;
 
     public I18n(RPGItemsExtNyaacat plugin, String lang) {
         instance = this;
@@ -26,7 +26,7 @@ public class I18n extends LanguageRepository {
     }
 
     @Override
-    protected String getLanguage() {
+    public String getLanguage() {
         return lang;
     }
 }

@@ -66,7 +66,7 @@ public class PowerThrowable extends BasePower implements PowerRightClick, PowerL
     @Override
     @SuppressWarnings("deprecation")
     public PowerResult<Void> fire(Player player, ItemStack stack) {
-        if (!checkCooldown(this, player, cooldown, true)) return PowerResult.cd();
+        if (!checkCooldown(this, player, cooldown, true, true)) return PowerResult.cd();
         ItemStack orig = stack.clone();
         if (!getItem().consumeDurability(stack, cost)) return PowerResult.cost();
         hijackEntitySpawn = true;

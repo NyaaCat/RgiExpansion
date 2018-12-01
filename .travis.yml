@@ -4,8 +4,13 @@ before_install:
 - export MAJOR_VERSION=`sed -n 's/^ext\.majorVersion = \(.*\)$/\1/p' build.gradle`
 - export MINOR_VERSION=`sed -n 's/^ext\.minorVersion = \(.*\)$/\1/p' build.gradle`
 - export MC_VERSION=`sed -n 's/^ext\.minecraftVersion = "\(.*\)"$/\1/p' build.gradle`
-- export VERSION_STRING=$MAJOR_VERSION.$MINOR_VERSION.$TRAVIS_BUILD_NUMBER-mc$MC_VERSION
-- 'sed -i "s/^\(version: \).*\$/\1$VERSION_STRING/g" src/main/resources/plugin.yml'
+- export FULL_VERSION_STRING=$MAJOR_VERSION.$MINOR_VERSION.$TRAVIS_BUILD_NUMBER-mc$MC_VERSION
+- |
+  if [[ $TRAVIS_COMMIT_MESSAGE == \[release\]* ]]
+    then export RELEASING=true
+    else export RELEASING=false
+  fi
+- 'sed -i "s/^\(version: \).*\$/\1$FULL_VERSION_STRING/g" src/main/resources/plugin.yml'
 - pushd ~/build/
 - git clone --depth=1 https://github.com/NyaaCat/NyaaCore NyaaCat/NyaaCore
 - export NYAACORE_LANG_DIR=`readlink -f ./NyaaCat/NyaaCore/src/main/resources/lang/`
@@ -13,36 +18,22 @@ before_install:
 after_success:
 - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then exit 0; fi
 - if [ "$TRAVIS_BRANCH" != "$MC_VERSION" ]; then exit 0; fi
-- 'cp build/libs/RgiExpansion.jar ./RgiExpansion-$VERSION_STRING.jar'
-- |
-  if [ $PUBLISH_MAVEN ]; then
-    ./gradlew publish
-    pushd ..;
-    git clone -b maven-repo $MAVEN_REPO_URL mvn;
-    cp -r RgiExpansion/build/repo/cat mvn/;
-    cd mvn;
-    git config credential.helper "store --file=.git/credentials";
-    echo "https://$GITHUB_KEY:@github.com" > .git/credentials;
-    git add .;
-    git commit -m "auto generated maven repo";
-    git push --follow-tags;
-    popd
-  fi
+- 'cp build/libs/RgiExpansion.jar ./RgiExpansion-$FULL_VERSION_STRING.jar'
 before_deploy:
-- if echo "$TRAVIS_COMMIT_MESSAGE" | grep -F -q "[unstable]" ; then echo "skipping travis deploy" && exit 0 ; fi
+- if $RELEASING ; then echo "releasing "$FULL_VERSION_STRING ; else echo "skipping travis deploy" && exit 0 ; fi
 - git config --global user.email "builds@travis-ci.com"
 - git config --global user.name "Travis CI"
-- export GIT_TAG=v$VERSION_STRING
+- export GIT_TAG=v$FULL_VERSION_STRING
 - git tag $GIT_TAG -a -m "Generated tag from TravisCI for build $TRAVIS_BUILD_NUMBER"
 - git config credential.helper "store --file=.git/credentials"
 - echo "https://${GITHUB_KEY}:@github.com" > .git/credentials
-- git push -q origin HEAD:$TRAVIS_BRANCH --follow-tags
+- git push -q origin HEAD:$TRAVIS_BRANCH --follow-tags || true
 deploy:
   skip_cleanup: true
   provider: releases
   prerelease: true
   api_key: $GITHUB_KEY
-  file: './RgiExpansion-$VERSION_STRING.jar'
+  file: './RgiExpansion-$FULL_VERSION_STRING.jar'
   body: 'RgiExpansion build $TRAVIS_BUILD_NUMBER for spigot $TRAVIS_BRANCH'
   on:
     tags: false
