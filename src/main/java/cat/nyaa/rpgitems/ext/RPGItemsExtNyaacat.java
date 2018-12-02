@@ -54,6 +54,7 @@ public final class RPGItemsExtNyaacat extends JavaPlugin {
     public void onLoad() {
         plugin = this;
         super.onLoad();
+        new I18n(this, "en_US");
         PowerManager.registerPowers(this, "cat.nyaa.rpgitems.ext.power");
         PowerManager.addDescriptionResolver(this, (power, property) -> {
             if (property == null) {
@@ -75,7 +76,6 @@ public final class RPGItemsExtNyaacat extends JavaPlugin {
     @Override
     public void onEnable() {
         plugin = this;
-        new I18n(this, "en_US");
         getServer().getPluginManager().registerEvents(new EventListener(), this);
         protocolManager = ProtocolLibrary.getProtocolManager();
         PacketAdapter packetAdapter = new PacketAdapter(RPGItemsExtNyaacat.plugin, ListenerPriority.NORMAL, ENTITY_PACKETS) {
