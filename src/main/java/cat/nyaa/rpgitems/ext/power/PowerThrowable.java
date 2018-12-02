@@ -179,7 +179,7 @@ public class PowerThrowable extends BasePower implements PowerRightClick, PowerL
     @Override
     @SuppressWarnings("rawtypes")
     public Set<Trigger> getTriggers() {
-        Set<Trigger> triggers = super.getTriggers();
+        Set<Trigger> triggers = new HashSet<>(super.getTriggers());
         triggers.add(Trigger.PROJECTILE_HIT);
         return triggers;
     }
