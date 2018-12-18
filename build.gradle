@@ -38,7 +38,7 @@ dependencies {
     compile('cat.nyaa:nyaacore:6.3-SNAPSHOT') {
         transitive = false
     }
-    compile('cat.nyaa:rpgitems:3.6-mc1.13.2-SNAPSHOT') {
+    compile('cat.nyaa:rpgitems:3.7-mc1.13.2-SNAPSHOT:release') {
         transitive = false
     }
     compile 'org.librazy:NyaaUtilsLangChecker:2.0-SNAPSHOT'

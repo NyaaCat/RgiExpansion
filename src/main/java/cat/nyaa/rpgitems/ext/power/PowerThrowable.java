@@ -24,6 +24,7 @@ import java.util.*;
 
 import static cat.nyaa.rpgitems.ext.RPGItemsExtNyaacat.*;
 import static com.comphenix.packetwrapper.WrapperPlayServerSpawnEntity.ObjectTypes.ITEM_STACK;
+import static com.comphenix.protocol.PacketType.Play.Server.SPAWN_ENTITY;
 import static think.rpgitems.power.Utils.checkCooldown;
 
 @PowerMeta(defaultTrigger = "RIGHT_CLICK", generalInterface = PowerPlain.class)
@@ -69,9 +70,9 @@ public class PowerThrowable extends BasePower implements PowerRightClick, PowerL
         if (!checkCooldown(this, player, cooldown, true, true)) return PowerResult.cd();
         ItemStack orig = stack.clone();
         if (!getItem().consumeDurability(stack, cost)) return PowerResult.cost();
-        hijackEntitySpawn = true;
+        hijack(SPAWN_ENTITY);
         Trident entity = player.launchProjectile(Trident.class);
-        hijackEntitySpawn = false;
+        stopHijack(SPAWN_ENTITY);
 
         int entityId = entity.getEntityId();
         PacketContainer packetContainer = entitySpawnCache.getIfPresent(entityId);
@@ -89,7 +90,7 @@ public class PowerThrowable extends BasePower implements PowerRightClick, PowerL
         protocolManager.broadcastServerPacket(spawnEntity.getHandle());
         protocolManager.broadcastServerPacket(metadata.getHandle());
 
-        Events.registerProjectile(entityId, getItem().getUID());
+        Events.registerProjectile(entityId, getItem().getUid());
 
         UUID uuid = entity.getUniqueId();
         Events.registerLocalItemStack(uuid, stack.clone());
@@ -153,7 +154,7 @@ public class PowerThrowable extends BasePower implements PowerRightClick, PowerL
     public PowerResult<Void> projectileHit(Player player, ItemStack stack, ProjectileHitEvent event) {
         Projectile arrow = event.getEntity();
         if (autoReturn > 0) {
-            if (item.getDurability(stack) <= 0) return PowerResult.fail();
+            if (getItem().getItemStackDurability(stack).map(d -> d <= 0).orElse(false)) return PowerResult.fail();
             int returnTime = this.autoReturn;
             if (loyaltyEnchant) {
                 returnTime = returnTime - 20 * stack.getEnchantmentLevel(Enchantment.LOYALTY);
@@ -166,7 +167,8 @@ public class PowerThrowable extends BasePower implements PowerRightClick, PowerL
                     ItemStack orig = Events.removeLocalItemStack(uniqueId);
                     HashMap<Integer, ItemStack> drop = player.getInventory().addItem(orig);
                     if (!drop.isEmpty()) {
-                        drop.values().forEach(i -> player.getLocation().getWorld().dropItem(player.getLocation(), i)
+                        drop.values().forEach(
+                                i -> player.getLocation().getWorld().dropItem(player.getLocation(), i)
                         );
                     }
                 }

@@ -26,7 +26,15 @@ import static com.comphenix.protocol.PacketType.Play.Server.*;
 
 public final class RPGItemsExtNyaacat extends JavaPlugin {
 
-    public static boolean hijackEntitySpawn;
+    public static Set<PacketType> hijacked = new HashSet<>();
+
+    public static void hijack(PacketType packetType){
+        hijacked.add(packetType);
+    }
+    public static void stopHijack(PacketType packetType){
+        hijacked.remove(packetType);
+    }
+
 
     public static ProtocolManager protocolManager;
 
@@ -82,7 +90,7 @@ public final class RPGItemsExtNyaacat extends JavaPlugin {
             @Override
             public void onPacketSending(PacketEvent event) {
                 int entityID = event.getPacket().getIntegers().read(0);
-                if (hijackEntitySpawn && event.getPacketType() == SPAWN_ENTITY && entitySpawnCache.getIfPresent(entityID) == null) {
+                if (isHijacked(SPAWN_ENTITY) && event.getPacketType() == SPAWN_ENTITY && entitySpawnCache.getIfPresent(entityID) == null) {
                     WrapperPlayServerSpawnEntity spawnEntity = new WrapperPlayServerSpawnEntity(event.getPacket());
                     entitySpawnCache.put(entityID, spawnEntity.getHandle().deepClone());
                     event.setCancelled(true);
@@ -101,6 +109,10 @@ public final class RPGItemsExtNyaacat extends JavaPlugin {
         };
 
         protocolManager.addPacketListener(packetAdapter);
+    }
+
+    private static boolean isHijacked(PacketType packetType) {
+        return hijacked.contains(packetType);
     }
 
     @Override
