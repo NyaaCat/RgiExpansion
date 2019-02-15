@@ -42,7 +42,7 @@ dependencies {
         transitive = false
     }
     compile 'org.librazy:NyaaUtilsLangChecker:2.0-SNAPSHOT'
-    compileOnly 'com.comphenix.protocol:ProtocolLib-API:4.4.0'
+    compileOnly 'com.comphenix.protocol:ProtocolLib-API:4.4.0-SNAPSHOT'
     compileOnly 'com.comphenix.packetwrapper:PacketWrapper:1.13-R0.1-SNAPSHOT'
 }
 

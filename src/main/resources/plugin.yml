@@ -5,3 +5,9 @@ depend: [NyaaCore,RPGItems,ProtocolLib,PacketWrapper]
 authors: [Librazy]
 api-version: 1.13
 
+commands:
+  rpgitems-ext-nyaacat:
+    description: RPG Items Ext NyaaCat
+    permission: rpgitems-ext-nyaacat
+    permission-message: "You do not have the required permission: <permission>"
+    usage: "/<command> [SubCommand...] [Arguments...] or /<command> help"

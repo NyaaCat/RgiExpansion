@@ -3,5 +3,12 @@ internal:
     using_language: '当前使用语言: %s'
     command_complete: 命令已执行!
     usage_prompt: '用法: %s'
+user:
+  castpoint:
+    left: '剩余%.2f秒！'
+    success: 施法中！
+    fail: 施法失败！
 power:
   throwable: 投掷物品
+  castpoint: '前摇%.2f秒'
+  castbackswing: '后摇%.2f秒'

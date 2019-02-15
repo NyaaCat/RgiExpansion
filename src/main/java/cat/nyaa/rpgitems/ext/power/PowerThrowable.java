@@ -90,7 +90,7 @@ public class PowerThrowable extends BasePower implements PowerRightClick, PowerL
         protocolManager.broadcastServerPacket(spawnEntity.getHandle());
         protocolManager.broadcastServerPacket(metadata.getHandle());
 
-        Events.registerProjectile(entityId, getItem().getUid());
+        Events.registerRPGProjectile(entityId, getItem().getUid());
 
         UUID uuid = entity.getUniqueId();
         Events.registerLocalItemStack(uuid, stack.clone());

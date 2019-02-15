@@ -3,5 +3,12 @@ internal:
     using_language: 'Now using language: %s'
     command_complete: Command Executed!
     usage_prompt: 'Usage: %s'
+user:
+  castpoint:
+    left: '%.2fs Left!'
+    success: Casting!
+    fail: Cast Failed!
 power:
   throwable: Throw this item
+  castpoint: 'Requires cast point of %.2fs'
+  castbackswing: 'Requires cast backswing of %.2fs'
